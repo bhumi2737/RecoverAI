@@ -18,7 +18,11 @@ class AIAgent:
         self.api_key = os.getenv("GROQ_API_KEY")
         self.client = None
         if self.api_key and self.api_key != "your_groq_api_key_here":
-            self.client = Groq(api_key=self.api_key)
+            try:
+                self.client = Groq(api_key=self.api_key)
+            except Exception as e:
+                print(f"Failed to initialize Groq client: {e}")
+                self.client = None
         self.model = "openai/gpt-oss-20b" # Or another appropriate Groq Llama model
 
     def recommend_action(self, case_info: dict) -> AIActionRecommendation:
