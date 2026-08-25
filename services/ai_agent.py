@@ -23,7 +23,7 @@ class AIAgent:
             except Exception as e:
                 print(f"Failed to initialize Groq client: {e}")
                 self.client = None
-        self.model = "openai/gpt-oss-20b" # Or another appropriate Groq Llama model
+        self.model = "llama-3.1-8b-instant" # A valid Groq model
 
     def recommend_action(self, case_info: dict) -> AIActionRecommendation:
         """
