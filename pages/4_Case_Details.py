@@ -14,17 +14,6 @@ render_top_nav()
 
 st.markdown("""
 <style>
-    .metric-card {
-        background-color: #1E293B;
-        border: 1px solid #334155;
-        border-radius: 8px;
-        padding: 1rem;
-        display: flex;
-        flex-direction: column;
-    }
-    .m-label { font-size: 11px; color: #94A3B8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-    .m-value { font-size: 20px; color: #F8FAFC; font-weight: 600; }
-    
     /* Horizontal Stepper */
     .stepper {
         display: flex;
@@ -81,7 +70,6 @@ if not case_data:
     st.error(f"Case {case_id} not found.")
     st.stop()
 
-# Header
 st.markdown(f"<h1 style='display:flex; align-items:center; gap:12px;'>Case Details <span style='font-family:monospace; font-size:18px; color:#0ea5e9; background:rgba(14,165,233,0.1); padding:4px 10px; border-radius:4px;'>{case_id}</span></h1>", unsafe_allow_html=True)
 
 res = case_data.get('orchestrator_result', {})
@@ -89,22 +77,22 @@ guard = res.get('guardrail_result', {})
 decision = guard.get('decision', 'PENDING')
 badge_class = f"badge-{decision.lower()}"
 
-# Top Section Metrics
+prob = res.get('prediction', {}).get('recovery_probability', 0)
+risk_level = "Low Risk" if prob > 0.6 else ("Medium Risk" if prob > 0.3 else "High Risk")
+risk_color = "#10B981" if risk_level == "Low Risk" else ("#F59E0B" if risk_level == "Medium Risk" else "#EF4444")
+conf = res.get('ai_recommendation', {}).get('confidence', 0)
+
 c1, c2, c3, c4, c5 = st.columns(5)
 with c1:
-    st.markdown(f'<div class="metric-card"><span class="m-label">Amount</span><span class="m-value">₹{case_data.get("transaction_amount", 0):,.2f}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><span class="m-label">Amount at Risk</span><span class="m-value">₹{case_data.get("transaction_amount", 0):,.2f}</span></div>', unsafe_allow_html=True)
 with c2:
-    st.markdown(f'<div class="metric-card"><span class="m-label">Customer</span><span class="m-value" style="font-size:16px;">{case_data.get("customer_id", "N/A")}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><span class="m-label">Risk Level</span><span class="m-value" style="color:{risk_color};">{risk_level}</span></div>', unsafe_allow_html=True)
 with c3:
-    prob = res.get('prediction', {}).get('recovery_probability', 0)
-    risk_level = "Low" if prob > 0.6 else ("Medium" if prob > 0.3 else "High")
-    risk_color = "#10B981" if risk_level == "Low" else ("#F59E0B" if risk_level == "Medium" else "#EF4444")
-    st.markdown(f'<div class="metric-card"><span class="m-label">Risk Level</span><span class="m-value" style="color:{risk_color};">{risk_level} Risk</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><span class="m-label">Recovery Prob</span><span class="m-value">{prob*100:.1f}%</span></div>', unsafe_allow_html=True)
 with c4:
-    conf = res.get('ai_recommendation', {}).get('confidence', 0)
-    st.markdown(f'<div class="metric-card"><span class="m-label">AI Confidence</span><span class="m-value" style="color:#0ea5e9;">{conf*100:.0f}%</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><span class="m-label">AI Confidence</span><span class="m-value" style="color:#0ea5e9;">{conf*100:.1f}%</span></div>', unsafe_allow_html=True)
 with c5:
-    st.markdown(f'<div class="metric-card"><span class="m-label">Final Outcome</span><span class="m-value"><span class="badge {badge_class}" style="margin-top:4px;">{decision}</span></span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><span class="m-label">Final Status</span><span class="m-value"><span class="badge {badge_class}" style="margin-top:4px;">{decision}</span></span></div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -112,62 +100,97 @@ if not res:
     st.warning("This case has not been processed by the orchestrator yet.")
     st.stop()
 
-# Stepper Workflow
-stages = ["DETECTED", "VERIFIED", "DIAGNOSED", "PREDICTED", "AI DECISION", "GUARDRAIL", "EXECUTED"]
-html = '<div style="position: relative;">'
-html += '<div class="stepper-line"><div class="stepper-line-fill"></div></div>'
-html += '<div class="stepper">'
-for stage in stages:
-    html += f"""
-<div class="step">
-    <div class="step-circle active"></div>
-    <div class="step-label active">{stage}</div>
-</div>
-"""
-html += '</div></div>'
-st.markdown(html, unsafe_allow_html=True)
-
-# Tabs for content
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Analysis & Decision", "AI Recovery Copilot", "Smart Outreach", "Fraud Graph", "Case Timeline"])
 
 with tab1:
-    col_ai, col_guard = st.columns(2)
+    col_ai, col_guard = st.columns([1, 1.2])
     with col_ai:
         diag = res.get('diagnosis', {})
         pred = res.get('prediction', {})
         ai_rec = res.get('ai_recommendation', {})
         
         st.markdown("<div class='card-panel'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='margin-top:0;'>🤖 AI Recommendation</h3>", unsafe_allow_html=True)
-        st.markdown(f"**Action:** `{ai_rec.get('action')}`")
-        st.markdown(f"**Expected Recovery Value:** ₹{res.get('expected_recovery_value', 0):,.2f}")
+        st.markdown("<h3 style='margin-top:0;'>🤖 RecoverAI Decision</h3>", unsafe_allow_html=True)
+        st.markdown(f"**Recommendation:** <span class='badge badge-ai'>{ai_rec.get('action')}</span>", unsafe_allow_html=True)
         
         st.markdown("<hr style='border-top: 1px solid #334155; margin: 1rem 0;'>", unsafe_allow_html=True)
-        st.markdown("#### Key Contributing Factors")
+        st.markdown("#### Why?")
         st.info(ai_rec.get('reason', 'No reasoning provided.'))
+        
+        st.markdown("#### Evidence")
+        st.markdown(f"- Recovery Probability: **{prob*100:.1f}%**")
+        st.markdown(f"- Expected Value: **₹{res.get('expected_recovery_value', 0):,.2f}**")
+        st.markdown(f"- Confidence: **{conf*100:.1f}%**")
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_guard:
+        exec_res = res.get('execution_result', {})
+        
         st.markdown("<div class='card-panel'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='margin-top:0;'>🛡️ Guardrail Check</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='margin-top:0;'>DECISION PIPELINE</h3>", unsafe_allow_html=True)
         
-        triggered = guard.get('rules_triggered', [])
-        if triggered:
-            st.error("**Rules Triggered:** " + ", ".join([f"`{r}`" for r in triggered]))
-        else:
-            st.success("**Rules Triggered:** None (All checks passed)")
-            
-        st.markdown(f"**Guardrail Enforcement Reason:** {guard.get('reason', 'N/A')}")
+        # 1. DIAGNOSIS
+        st.markdown(f"""
+        <div class="pipeline-stage">
+            <div class="pipeline-title">1. DIAGNOSIS</div>
+            <div><strong>Result:</strong> {diag.get('diagnosis', 'N/A')}</div>
+            <div><strong>Confidence:</strong> {diag.get('confidence', 0)*100:.1f}%</div>
+        </div>
+        <div class="pipeline-arrow">↓</div>
+        """, unsafe_allow_html=True)
         
-        exec_res = res.get('execution_result')
-        if exec_res:
-            st.markdown("<hr style='border-top: 1px solid #334155; margin: 1rem 0;'>", unsafe_allow_html=True)
-            st.markdown("#### Execution Output")
-            st.markdown(f"**Status:** {exec_res.get('status').upper()}")
-            if 'payment_link' in exec_res:
-                st.markdown(f"**Generated Link:** [{exec_res['payment_link']}]({exec_res['payment_link']})")
-            if 'message' in exec_res:
-                st.markdown(f"**Message:** {exec_res['message']}")
+        # 2. ML PREDICTION
+        st.markdown(f"""
+        <div class="pipeline-stage">
+            <div class="pipeline-title">2. ML PREDICTION</div>
+            <div><strong>Recovery Probability:</strong> {prob*100:.1f}%</div>
+            <div><span style="color:#94A3B8; font-size: 13px;">Model: {pred.get('model_version', 'Unknown')}</span></div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        model_sig = pred.get('model_signal')
+        if model_sig and isinstance(model_sig, list):
+            with st.expander("Why did the model predict this?"):
+                st.markdown("<p style='font-size: 13px; color: #94A3B8;'>Model signals indicate statistical influence, not causation.</p>", unsafe_allow_html=True)
+                for item in model_sig:
+                    k = item.get("Feature", "Unknown")
+                    v = item.get("Coefficient", 0)
+                    color = "#10B981" if v > 0 else "#EF4444"
+                    st.markdown(f"- **{k}:** <span style='color:{color};'>{v:.4f}</span>", unsafe_allow_html=True)
+
+        st.markdown("<div class='pipeline-arrow'>↓</div>", unsafe_allow_html=True)
+
+        # 3. AI RECOMMENDATION
+        st.markdown(f"""
+        <div class="pipeline-stage">
+            <div class="pipeline-title">3. AI RECOMMENDATION</div>
+            <div><strong>Action:</strong> <span class="badge badge-ai">{ai_rec.get('action')}</span></div>
+            <div><strong>AI Confidence:</strong> {conf*100:.1f}%</div>
+        </div>
+        <div class="pipeline-arrow">↓</div>
+        """, unsafe_allow_html=True)
+        
+        # 4. GUARDRAIL VALIDATION
+        rules = guard.get('rules_triggered', [])
+        rules_text = ", ".join([f"`{r}`" for r in rules]) if rules else "None"
+        st.markdown(f"""
+        <div class="pipeline-stage">
+            <div class="pipeline-title">4. GUARDRAIL VALIDATION</div>
+            <div><strong>Decision:</strong> <span class="badge {badge_class}">{decision}</span></div>
+            <div><strong>Rules Triggered:</strong> {rules_text}</div>
+            <div style="margin-top: 8px; color: #CBD5E1; font-size: 14px;"><strong>Reason:</strong> {guard.get('reason')}</div>
+        </div>
+        <div class="pipeline-arrow">↓</div>
+        """, unsafe_allow_html=True)
+        
+        # 5. FINAL DECISION
+        exec_status = exec_res.get('status', 'PENDING').upper()
+        st.markdown(f"""
+        <div class="pipeline-stage" style="border-color: #38bdf8;">
+            <div class="pipeline-title" style="color: #38bdf8;">5. FINAL DECISION</div>
+            <div><strong>Execution Status:</strong> {exec_status}</div>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 with tab2:
@@ -175,21 +198,21 @@ with tab2:
     <div class="copilot-header">
         <div style="font-size: 24px;">🤖</div>
         <div>
-            <div style="font-weight: 600; color: #F8FAFC;">AI Recovery Copilot</div>
-            <div style="font-size: 13px; color: #94A3B8;">Analyzing context for Case ID: <code style="background:transparent; color:#0ea5e9; padding:0;">{case_id}</code></div>
+            <div style="font-weight: 600; color: #F8FAFC;">RecoverAI Copilot</div>
+            <div style="font-size: 13px; color: #94A3B8;">Ask questions about this case and its decision.</div>
+            <div style="font-size: 11px; color: #38bdf8; margin-top: 4px; font-weight: 600; text-transform: uppercase;">● Analyzing current case</div>
         </div>
     </div>
-    """.format(case_id=case_id), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
-    # Preset Prompt Logic
     if 'preset_prompt' not in st.session_state:
         st.session_state.preset_prompt = ""
         
-    st.markdown("<p style='font-size: 13px; color: #94A3B8; margin-bottom: 8px;'>Suggested Questions:</p>", unsafe_allow_html=True)
-    b1, b2, b3 = st.columns(3)
-    if b1.button("Why was this outcome chosen?", use_container_width=True): st.session_state.preset_prompt = "Why was this outcome chosen?"
-    if b2.button("What factors influenced the score?", use_container_width=True): st.session_state.preset_prompt = "What factors influenced the score?"
-    if b3.button("What manual action should I take?", use_container_width=True): st.session_state.preset_prompt = "What manual action should I take?"
+    b1, b2, b3, b4 = st.columns(4)
+    if b1.button("Why was this action recommended?", use_container_width=True): st.session_state.preset_prompt = "Why was this action recommended?"
+    if b2.button("What factors influenced the prediction?", use_container_width=True): st.session_state.preset_prompt = "What factors influenced the prediction?"
+    if b3.button("Why was this case escalated?", use_container_width=True): st.session_state.preset_prompt = "Why was this case escalated?"
+    if b4.button("Which guardrail was triggered?", use_container_width=True): st.session_state.preset_prompt = "Which guardrail was triggered?"
     
     chat_key = f"chat_history_{case_id}"
     if chat_key not in st.session_state:
@@ -221,7 +244,8 @@ with tab2:
                     **case_data,
                     "diagnosis": res.get("diagnosis", {}).get("diagnosis"),
                     "recovery_probability": res.get("prediction", {}).get("recovery_probability"),
-                    "ai_recommendation": res.get("ai_recommendation")
+                    "ai_recommendation": res.get("ai_recommendation"),
+                    "guardrail": res.get("guardrail_result")
                 }
                 
                 response = agent.chat_with_agent(
@@ -269,7 +293,6 @@ with tab4:
     node_color = ["#0ea5e9", "#ef4444", "#ef4444", "#f59e0b"]
     
     fig = go.Figure()
-    # Edges
     for i in range(0, len(edge_x), 2):
         fig.add_trace(go.Scatter(
             x=edge_x[i:i+2], y=edge_y[i:i+2],
@@ -277,7 +300,6 @@ with tab4:
             hoverinfo='none',
             mode='lines'
         ))
-    # Nodes
     fig.add_trace(go.Scatter(
         x=node_x, y=node_y,
         mode='markers+text',
@@ -310,7 +332,7 @@ with tab4:
 
 with tab5:
     st.markdown("<div class='card-panel'>", unsafe_allow_html=True)
-    st.markdown("<h3 style='margin-top:0;'>🕒 Case Timeline (Audit Log)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-top:0;'>🕒 Case Timeline</h3>", unsafe_allow_html=True)
     logs = AuditRepository.get_logs_for_case(case_id)
     if logs:
         html = '<div class="feed-container">'

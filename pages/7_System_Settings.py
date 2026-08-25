@@ -6,7 +6,7 @@ from utils.navigation import render_top_nav
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-st.set_page_config(page_title="System Settings | RecoverAI", layout="wide")
+st.set_page_config(page_title="Guardrail Control Center | RecoverAI", layout="wide")
 apply_custom_theme()
 render_top_nav()
 
@@ -26,8 +26,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='display:flex; align-items:center; gap:12px;'>⚙️ Guardrail Control Center</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#94A3B8;'>Dynamically adjust the safety guardrails and business rules governing the RecoverAI engine.</p><br>", unsafe_allow_html=True)
+st.markdown("<h1 style='display:flex; align-items:center; gap:12px;'>⚙️ AI Guardrail Control Center</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#94A3B8;'>Deterministic safety rules that validate every AI recommendation before execution.</p><br>", unsafe_allow_html=True)
 
 if 'max_recovery_attempts' not in st.session_state:
     st.session_state.max_recovery_attempts = int(os.getenv("MAX_RECOVERY_ATTEMPTS", "2"))
@@ -37,6 +37,13 @@ if 'min_ai_confidence' not in st.session_state:
     st.session_state.min_ai_confidence = float(os.getenv("MIN_AI_CONFIDENCE", "0.60"))
 if 'high_value_threshold' not in st.session_state:
     st.session_state.high_value_threshold = float(os.getenv("HIGH_VALUE_THRESHOLD", "10000"))
+
+st.markdown("""
+<div style="background-color: rgba(16, 185, 129, 0.1); border-left: 4px solid #10B981; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+    <div style="color: #34d399; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 13px; margin-bottom: 4px;">SAFETY STATUS</div>
+    <div style="color: #F8FAFC; font-weight: 500;">● Guardrails Active &mdash; AI recommendations require deterministic validation before execution.</div>
+</div>
+""", unsafe_allow_html=True)
 
 col1, col2 = st.columns([1.2, 1])
 
@@ -74,39 +81,24 @@ with col1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col2:
-    st.markdown("<div class='card-panel'><h3 style='margin-top:0;'>📈 Real-time Impact Projection</h3><br>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #94A3B8;'>By adjusting the guardrails in real-time, you can see how it would affect future cases based on historical simulations.</p>", unsafe_allow_html=True)
+    st.markdown("<div class='card-panel'><h3 style='margin-top:0;'>📈 Active Rule Impact</h3><br>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #94A3B8;'>The Orchestrator actively enforces these values across all incoming payment failures.</p>", unsafe_allow_html=True)
     
-    # Simple heuristic to show "impact" based on slider values to wow the judges
-    base_confidence = 0.60
-    current_confidence = st.session_state.min_ai_confidence
-    diff_conf = current_confidence - base_confidence
-    
-    base_attempts = 2
-    current_attempts = st.session_state.max_recovery_attempts
-    diff_attempts = current_attempts - base_attempts
-    
-    blocked_cases_impact = int((diff_conf * 100) - (diff_attempts * 5))
-    
-    if blocked_cases_impact > 0:
-        impact_text = f"🚨 These stricter settings would **BLOCK or ESCALATE ~{abs(blocked_cases_impact)}% MORE** cases than the baseline configuration."
-        color = "#EF4444"
-        bg_color = "rgba(239, 68, 68, 0.1)"
-    elif blocked_cases_impact < 0:
-        impact_text = f"⚠️ These looser settings would **ALLOW ~{abs(blocked_cases_impact)}% MORE** cases to proceed automatically than the baseline configuration."
-        color = "#F59E0B"
-        bg_color = "rgba(245, 158, 11, 0.1)"
-    else:
-        impact_text = "✅ These settings align with the baseline historical configuration."
-        color = "#10B981"
-        bg_color = "rgba(16, 185, 129, 0.1)"
-        
     st.markdown(f"""
-    <div style="padding: 1.5rem; background-color: {bg_color}; border-left: 4px solid {color}; border-radius: 4px; margin-top: 1rem;">
-        <span style="color: #F8FAFC; font-size: 15px;">{impact_text}</span>
+    <div style="padding: 1rem; background-color: #0F172A; border: 1px solid #334155; border-radius: 6px; margin-bottom: 1rem;">
+        <strong style="color: #F8FAFC;">Recovery Limit:</strong><br>
+        <span style="color: #94A3B8; font-size: 14px;">Any case with more than <span style="color: #38bdf8;">{st.session_state.max_recovery_attempts}</span> previous attempts will be safely blocked by the system, prioritizing customer experience.</span>
+    </div>
+    
+    <div style="padding: 1rem; background-color: #0F172A; border: 1px solid #334155; border-radius: 6px; margin-bottom: 1rem;">
+        <strong style="color: #F8FAFC;">Confidence Minimum:</strong><br>
+        <span style="color: #94A3B8; font-size: 14px;">AI must have at least <span style="color: #38bdf8;">{st.session_state.min_ai_confidence*100:.0f}%</span> confidence in its recommendation. Otherwise, it will automatically escalate to a human.</span>
+    </div>
+    
+    <div style="padding: 1rem; background-color: #0F172A; border: 1px solid #334155; border-radius: 6px;">
+        <strong style="color: #F8FAFC;">Value Approval:</strong><br>
+        <span style="color: #94A3B8; font-size: 14px;">Payments exceeding <span style="color: #38bdf8;">₹{st.session_state.high_value_threshold:,.2f}</span> cannot be autonomously recovered and will always require an analyst's sign-off.</span>
     </div>
     """, unsafe_allow_html=True)
-    
-    st.markdown("<br><p style='font-size: 13px; color: #64748B;'><i>Impact projection is calculated dynamically based on current slider values. Test these new settings by running a new Batch Simulation.</i></p>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)

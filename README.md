@@ -53,12 +53,14 @@ graph TD
 
 ## 🧠 Machine Learning Metrics
 
-The baseline predictor uses a Logistic Regression model trained on a synthetic dataset of realistic payment failures.
+The system dynamically evaluates both Logistic Regression and Random Forest models during training on a synthetic dataset of realistic payment failures. The final model is selected based on the F1-score.
 
-**Held-Out Test Set Results:**
-- **Accuracy**: `0.74`
-- **ROC-AUC**: `0.7493`
+**Held-Out Test Set Results (Currently Selected: Logistic Regression):**
+- **Accuracy**: `0.7400`
+- **Precision (Recoverable Class)**: `0.7625`
+- **Recall (Recoverable Class)**: `0.8971`
 - **F1-Score (Recoverable Class)**: `0.8243`
+- **ROC-AUC**: `0.7493`
 
 *Top Features Influencing Prediction:*
 - 🟢 `previous_recovery_success` (+0.40)

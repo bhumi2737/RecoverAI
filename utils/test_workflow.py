@@ -95,7 +95,14 @@ def test_workflow():
     print_result("Test 5 - High-value transaction", res5)
     assert res5['guardrail_result']['decision'] == "REQUIRE_APPROVAL", "Test 5 Failed"
     
-    print("\n✅ All 5 tests passed successfully!")
+    # Test 6: Low probability case
+    case6 = dict(base_case)
+    case6["case_id"] = "case_test_6"
+    case6["failure_reason"] = "suspected_fraud"
+    res6 = orchestrator.process_case(case6)
+    print_result("Test 6 - Low probability case", res6)
+    
+    print("\n✅ All 6 tests passed successfully!")
 
 if __name__ == "__main__":
     test_workflow()

@@ -8,7 +8,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_auc_score, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report, roc_auc_score, precision_score, recall_score, f1_score, accuracy_score
 import json
 
 def train_and_evaluate():
@@ -59,6 +59,7 @@ def train_and_evaluate():
     lr_recall = recall_score(y_test, lr_preds)
     lr_f1 = f1_score(y_test, lr_preds)
     lr_roc_auc = roc_auc_score(y_test, lr_probs)
+    lr_accuracy = accuracy_score(y_test, lr_preds)
 
     print("--- Logistic Regression Baseline ---")
     print(classification_report(y_test, lr_preds))
@@ -76,6 +77,7 @@ def train_and_evaluate():
     rf_recall = recall_score(y_test, rf_preds)
     rf_f1 = f1_score(y_test, rf_preds)
     rf_roc_auc = roc_auc_score(y_test, rf_probs)
+    rf_accuracy = accuracy_score(y_test, rf_preds)
 
     print("--- Random Forest Primary Model ---")
     print(classification_report(y_test, rf_preds))
@@ -87,6 +89,7 @@ def train_and_evaluate():
         best_model_name = "Random Forest"
         best_metrics = {
             "model": best_model_name,
+            "accuracy": rf_accuracy,
             "precision": rf_precision,
             "recall": rf_recall,
             "f1_score": rf_f1,
@@ -110,6 +113,7 @@ def train_and_evaluate():
         best_model_name = "Logistic Regression"
         best_metrics = {
             "model": best_model_name,
+            "accuracy": lr_accuracy,
             "precision": lr_precision,
             "recall": lr_recall,
             "f1_score": lr_f1,
