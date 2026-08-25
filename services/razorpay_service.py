@@ -1,6 +1,9 @@
 import os
 import uuid
-import razorpay
+try:
+    import razorpay
+except ImportError:
+    razorpay = None
 from dotenv import load_dotenv
 
 load_dotenv()
