@@ -23,12 +23,16 @@ class AIAgent:
             except Exception:
                 pass
         self.client = None
+        self.error_message = None
         if self.api_key and self.api_key != "your_groq_api_key_here":
             try:
                 self.client = Groq(api_key=self.api_key)
             except Exception as e:
+                self.error_message = f"Groq Init Error: {str(e)}"
                 print(f"Failed to initialize Groq client: {e}")
                 self.client = None
+        else:
+            self.error_message = "API key not found or is default placeholder."
         self.model = "llama-3.1-8b-instant" # A valid Groq model
 
     def recommend_action(self, case_info: dict) -> AIActionRecommendation:
@@ -118,7 +122,8 @@ class AIAgent:
     def chat_with_agent(self, case_info: dict, user_message: str, history: list) -> str:
         """Allows conversational interaction about a specific case."""
         if not self.client:
-            return "I'm sorry, I am currently operating in offline fallback mode because the Groq API key is missing. I cannot chat right now."
+            err = self.error_message or "Unknown initialization error"
+            return f"I'm sorry, I am currently operating in offline fallback mode because the Groq API key is missing. ({err}) I cannot chat right now."
             
         def json_serial(obj):
             from datetime import datetime, date
