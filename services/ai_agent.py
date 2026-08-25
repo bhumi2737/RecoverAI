@@ -33,7 +33,7 @@ class AIAgent:
                 self.client = None
         else:
             self.error_message = "API key not found or is default placeholder."
-        self.model = "llama-3.1-8b-instant" # A valid Groq model
+        self.model = "openai/gpt-oss-20b" # Or another appropriate Groq Llama model
 
     def recommend_action(self, case_info: dict) -> AIActionRecommendation:
         """
