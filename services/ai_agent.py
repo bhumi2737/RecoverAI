@@ -16,6 +16,12 @@ class AIActionRecommendation(BaseModel):
 class AIAgent:
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
+        if not self.api_key:
+            try:
+                import streamlit as st
+                self.api_key = st.secrets.get("GROQ_API_KEY")
+            except Exception:
+                pass
         self.client = None
         if self.api_key and self.api_key != "your_groq_api_key_here":
             try:
