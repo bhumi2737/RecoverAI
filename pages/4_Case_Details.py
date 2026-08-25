@@ -105,9 +105,9 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["Analysis & Decision", "AI Recovery Copi
 with tab1:
     col_ai, col_guard = st.columns([1, 1.2])
     with col_ai:
-        diag = res.get('diagnosis', {})
-        pred = res.get('prediction', {})
-        ai_rec = res.get('ai_recommendation', {})
+        diag = res.get('diagnosis') or {}
+        pred = res.get('prediction') or {}
+        ai_rec = res.get('ai_recommendation') or {}
         
         st.markdown("<div class='card-panel'>", unsafe_allow_html=True)
         st.markdown("<h3 style='margin-top:0;'>🤖 RecoverAI Decision</h3>", unsafe_allow_html=True)
@@ -124,7 +124,7 @@ with tab1:
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_guard:
-        exec_res = res.get('execution_result', {})
+        exec_res = res.get('execution_result') or {}
         
         st.markdown("<div class='card-panel'>", unsafe_allow_html=True)
         st.markdown("<h3 style='margin-top:0;'>DECISION PIPELINE</h3>", unsafe_allow_html=True)

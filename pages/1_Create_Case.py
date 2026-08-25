@@ -118,11 +118,11 @@ if submitted:
 with col_result:
     if 'last_result' in st.session_state:
         res = st.session_state.last_result
-        diag = res.get('diagnosis', {})
-        pred = res.get('prediction', {})
-        ai_rec = res.get('ai_recommendation', {})
-        guard = res.get('guardrail_result', {})
-        exec_res = res.get('execution_result', {})
+        diag = res.get('diagnosis') or {}
+        pred = res.get('prediction') or {}
+        ai_rec = res.get('ai_recommendation') or {}
+        guard = res.get('guardrail_result') or {}
+        exec_res = res.get('execution_result') or {}
         
         prob = pred.get('recovery_probability', 0.0)
         ai_risk = "Low Risk" if prob > 0.6 else ("Medium Risk" if prob > 0.3 else "High Risk")
