@@ -2,6 +2,8 @@
 
 > **An AI-powered, guardrailed revenue recovery system.**
 > *Built for the Razorpay Buildathon | Track 03: AI Revenue Recovery*
+> 
+> 🔗 **Live Demo:** [https://recoverai.streamlit.app/Home](https://recoverai.streamlit.app/Home)
 
 RecoverAI is an intelligent, scalable fintech operations platform designed to safely maximize revenue recovery from failed customer payments. It utilizes predictive machine learning to evaluate recovery probability and employs a bounded Generative AI decision agent to recommend the best recovery strategy. Crucially, every AI action is strictly vetted by a deterministic Guardrail Engine before any financial or communication actions are executed.
 
