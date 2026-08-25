@@ -63,9 +63,9 @@ The system dynamically evaluates both Logistic Regression and Random Forest mode
 - **ROC-AUC**: `0.7493`
 
 *Top Features Influencing Prediction:*
-- 🟢 `previous_recovery_success` (+0.40)
-- 🟢 `successful_payments` (+0.32)
 - 🔴 `failure_reason_suspected_fraud` (-2.28)
+- 🟢 `failure_reason_insufficient_funds` (+1.12)
+- 🟢 `failure_reason_network_error` (+0.94)
 
 ---
 
@@ -91,8 +91,8 @@ The system dynamically evaluates both Logistic Regression and Random Forest mode
 ### 2. Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/recoverai.git
-cd recoverai
+git clone https://github.com/bhumi2737/RecoverAI.git
+cd RecoverAI
 
 # Create and activate virtual environment
 python -m venv venv

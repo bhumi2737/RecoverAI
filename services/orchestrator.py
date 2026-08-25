@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Any
 from .diagnosis import DiagnosisService
 from .recovery_predictor import RecoveryPredictor
@@ -31,7 +32,7 @@ class WorkflowOrchestrator:
         recovery_prob = prediction_result.get('recovery_probability', 0.0)
         
         # Calculate Expected Recovery Value
-        intervention_cost = 10.0 # Base cost
+        intervention_cost = float(os.getenv("INTERVENTION_COST", "50.0")) # Base cost
         erv = (recovery_prob * amount) - intervention_cost
         
         # 4. AI Recommendation

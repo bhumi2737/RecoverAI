@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Dict, Any
 from dotenv import load_dotenv
 
@@ -124,7 +125,7 @@ class GuardrailEngine:
             
         # Rule 7: Low expected recovery value
         # Define a minimum intervention cost equivalent
-        min_intervention_cost = 50.0 
+        min_intervention_cost = float(os.getenv("INTERVENTION_COST", "50.0")) 
         if expected_recovery_value < min_intervention_cost and action != "STOP":
             return {
                 "decision": "STOP",
