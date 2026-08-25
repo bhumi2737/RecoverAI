@@ -156,7 +156,7 @@ class AIAgent:
             return chat_completion.choices[0].message.content
         except Exception as e:
             print(f"AI Chat error: {e}")
-            return "Sorry, I encountered an error while trying to respond."
+            return f"Sorry, I encountered an error while trying to respond: {str(e)}"
             
     def generate_outreach_message(self, case_info: dict) -> str:
         """Generates a hyper-personalized outreach message using GenAI."""
