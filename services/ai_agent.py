@@ -173,7 +173,13 @@ class AIAgent:
         - If the user is high value, add a VIP touch.
         """
         
-        user_prompt = f"Draft a recovery message for this case:\n{json.dumps(case_info, indent=2)}"
+        def json_serial(obj):
+            from datetime import datetime, date
+            if isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            return str(obj)
+            
+        user_prompt = f"Draft a recovery message for this case:\n{json.dumps(case_info, indent=2, default=json_serial)}"
         
         try:
             chat_completion = self.client.chat.completions.create(
